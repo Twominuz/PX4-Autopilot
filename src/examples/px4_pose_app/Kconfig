@@ -1,0 +1,5 @@
+menuconfig EXAMPLES_PX4_POSE_APP
+	bool "px4_pose_app"
+	default n
+	---help---
+		Enable support for px4_pose_app
