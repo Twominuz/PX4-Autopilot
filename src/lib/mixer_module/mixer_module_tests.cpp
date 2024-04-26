@@ -183,6 +183,7 @@ private:
 
 TEST_F(MixerModuleTest, basic)
 {
+	PX4_WARN("TEST_F(MixerModuleTest, basic)")
 	OutputModuleTest test_module;
 	test_module.configureFunctions({});
 	MixingOutput mixing_output{PARAM_PREFIX, max_num_outputs, test_module, MixingOutput::SchedulingPolicy::Disabled, false, false};
@@ -267,6 +268,7 @@ TEST_F(MixerModuleTest, basic)
 
 TEST_F(MixerModuleTest, arming)
 {
+	PX4_WARN("TEST_F(MixerModuleTest, arming)")
 	OutputModuleTest test_module;
 	test_module.configureFunctions({
 		0,

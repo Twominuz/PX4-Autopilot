@@ -1425,13 +1425,13 @@ Commander::handle_command(const vehicle_command_s &cmd)
 	return true;
 }
 
-unsigned Commander::handleCommandActuatorTest(const vehicle_command_s &cmd)
+unsigned Commander::handleCommandActuatorTest(const vehicle_command_s &cmd)		//twominus
 {
 	if (_arm_state_machine.isArmed() || (_safety.isButtonAvailable() && !_safety.isSafetyOff())) {
 		return vehicle_command_ack_s::VEHICLE_CMD_RESULT_DENIED;
 	}
 
-	if (_param_com_mot_test_en.get() != 1) {
+	if (_param_com_mot_test_en.get() != 1) {				//itim2(twominus) Check Enable Actuator Testing if disable (COM_MOT_TEST_EN=0) function will denied.
 		return vehicle_command_ack_s::VEHICLE_CMD_RESULT_DENIED;
 	}
 
@@ -1460,6 +1460,7 @@ unsigned Commander::handleCommandActuatorTest(const vehicle_command_s &cmd)
 	}
 
 	actuator_test.value = cmd.param1;
+	//actuator_test.value = -0.1; //itim override servo parameter for testing from slider (Enable slider and slider for start sending the value)
 
 	actuator_test.action = actuator_test_s::ACTION_DO_CONTROL;
 	int timeout_ms = (int)(cmd.param2 * 1000.f + 0.5f);

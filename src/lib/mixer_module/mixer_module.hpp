@@ -60,6 +60,9 @@
 #include <uORB/topics/actuator_outputs.h>
 #include <uORB/topics/parameter_update.h>
 
+/*add */
+#include "ActuatorValueMix.hpp"
+
 using namespace time_literals;
 
 /**
@@ -289,6 +292,8 @@ private:
 	param_t _param_handle_rev_range{PARAM_INVALID};
 	hrt_abstime _lowrate_schedule_interval{300_ms};
 	ActuatorTest _actuator_test{_function_assignment};
+	//ActuatorValueMix _actuator_value_mix{_function_assignment};
+
 	uint32_t _reversible_mask{0}; ///< per-output bits. If set, the output is configured to be reversible (motors only)
 
 	uORB::SubscriptionCallbackWorkItem *_subscription_callback{nullptr}; ///< current scheduling callback
@@ -297,6 +302,13 @@ private:
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::MC_AIRMODE>) _param_mc_airmode,   ///< multicopter air-mode
 		(ParamFloat<px4::params::MOT_SLEW_MAX>) _param_mot_slew_max,
-		(ParamFloat<px4::params::THR_MDL_FAC>) _param_thr_mdl_fac ///< thrust to motor control signal modelling factor
+		(ParamFloat<px4::params::THR_MDL_FAC>) _param_thr_mdl_fac, ///< thrust to motor control signal modelling factor
+		
+		/*ActuatorValueMix*/
+		(ParamBool<px4::params::A_PFL_EN>) _param_auto_pfl_en,
+		(ParamInt<px4::params::A_PFL_SV_LOOP>) _param_auto_pfl_sv_loop,
+        (ParamFloat<px4::params::A_PFL_MT_TIME>) _param_auto_pfl_mt_time,
+		(ParamInt<px4::params::A_PFL_MODE>) _param_auto_pfl_mode
+	
 	)
 };

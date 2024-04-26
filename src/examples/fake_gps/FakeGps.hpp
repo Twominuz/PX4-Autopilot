@@ -41,6 +41,17 @@
 #include <uORB/PublicationMulti.hpp>
 #include <uORB/Subscription.hpp>
 #include <uORB/topics/sensor_gps.h>
+#include <drivers/drv_hrt.h>
+
+#include <systemlib/mavlink_log.h>
+#include <px4_platform_common/events.h>
+#include <px4_platform_common/log.h>
+#include "modules/commander/commander_helper.h"
+
+
+using namespace time_literals;
+
+using namespace time_literals;
 
 class FakeGps : public ModuleBase<FakeGps>, public ModuleParams, public px4::ScheduledWorkItem
 {
@@ -60,8 +71,10 @@ public:
 
 	bool init();
 
+	orb_advert_t *get_mavlink_log_pub() { return &_mavlink_log_pub; }
+
 private:
-	static constexpr uint32_t SENSOR_INTERVAL_US{1000000 / 5}; // 5 Hz
+	static constexpr uint32_t SENSOR_INTERVAL_US{1_s / 5}; // 5 Hz
 
 	void Run() override;
 
@@ -70,4 +83,14 @@ private:
 	int32_t _latitude{296603018};   // Latitude in 1e-7 degrees
 	int32_t _longitude{-823160500}; // Longitude in 1e-7 degrees
 	int32_t _altitude{30100};       // Altitude in 1e-3 meters above MSL, (millimetres)
+
+	//orb_advert_t *_mavlink_log_pub{nullptr};
+        orb_advert_t    _mavlink_log_pub{nullptr};
+
+
+        bool _warning_check{true};
+
+
+protected:
+        FakeGps *_fakegps{nullptr};
 };

@@ -1,0 +1,5 @@
+menuconfig EXAMPLES_PX4_TWOMSG_APP
+	bool "px4_twomsg_app"
+	default n
+	---help---
+		Enable support for px4_twomsg_app

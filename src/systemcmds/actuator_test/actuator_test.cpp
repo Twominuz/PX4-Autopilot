@@ -45,6 +45,13 @@
 #include <uORB/topics/actuator_test.h>
 #include <math.h>
 
+#include <cmath>
+
+
+bool _time_reset{true};
+hrt_abstime _previous_time{0};
+
+
 extern "C" __EXPORT int actuator_test_main(int argc, char *argv[]);
 
 static void actuator_test(int function, float value, int timeout_ms, bool release_control);
@@ -86,8 +93,13 @@ WARNING: remove all props before using this command.
 	PRINT_MODULE_USAGE_PARAM_FLOAT('v', 0, -1, 1, "value (-1...1)", false);
 	PRINT_MODULE_USAGE_PARAM_INT('t', 0, 0, 100, "Timeout in seconds (run interactive if not set)", true);
 
+	PRINT_MODULE_USAGE_COMMAND_DESCR("Motors5-Servos2", "Iterate 4 Motor and 2 Servo (Left-Right Aileron)");
 	PRINT_MODULE_USAGE_COMMAND_DESCR("iterate-motors", "Iterate all motors starting and stopping one after the other");
 	PRINT_MODULE_USAGE_COMMAND_DESCR("iterate-servos", "Iterate all servos deflecting one after the other");
+	PRINT_MODULE_USAGE_COMMAND_DESCR("servos-1-twowave", "Iterate all servos 1-2 (Twowave)");
+	PRINT_MODULE_USAGE_COMMAND_DESCR("Motors-User", "Iterate all Motor In U FR BR BL FL");
+	
+	
 }
 
 int actuator_test_main(int argc, char *argv[])
@@ -96,7 +108,8 @@ int actuator_test_main(int argc, char *argv[])
 	float value = 10.0f;
 	int ch;
 	int timeout_ms = 0;
-
+	int m[5] = {0, 3, 1, 2, 4};
+	int mt;
 	int myoptind = 1;
 	const char *myoptarg = nullptr;
 
@@ -184,7 +197,175 @@ int actuator_test_main(int argc, char *argv[])
 				px4_usleep(1000000);
 			}
 			return 0;
+		}//itim4
+		
+		
+		else if (strcmp("servos-1-twowave", argv[myoptind]) == 0) {
+			//value = 0.3f;
+
+					/*if (_time_reset){ //true and start if
+					_previous_time = hrt_absolute_time();
+					_time_reset = false;
+					}*/
+
+                /* if (hrt_elapsed_time(& _previous_time)> 1_s){  //set every n second
+                        _time_reset = true;
+				*/
+
+				for (int i = 0; i < 2; ++i) {
+					value = 0.0f;
+					PX4_INFO("Start Servo %i value = (%.0f%%)",i+1,(double)(value*100.f));
+						px4_usleep(2000000);
+						for (int x = 1; x < 5; ++x) {
+								//float result = std::pow(-1, x + 1);
+								float result = 0.0f;
+								switch (x % 2) {
+									case 0:
+										result =-1.0f;
+										break;
+									case 1:
+										result =1.0f;
+										break;
+									default:
+										result =0.0f;
+								}
+								value = result*0.8f;
+								PX4_INFO("Servo %i Test %d value (%.0f%%)", i+1, x, (double)(value*100.f));
+								actuator_test(actuator_test_s::FUNCTION_SERVO1+i, value, 800, false);
+								//actuator_test(int function,float value, int timeout_ms, bool release_control)
+								px4_usleep(2000000);
+						}
+					if(i == 1){
+						break;
+					}
+
+					PX4_INFO("Waiting 5 sec to Servo %i",i+2);
+					px4_usleep(5000000);
+				}
+				PX4_INFO("FINISH!!!");
+			return 0;
 		}
+		//itim4
+
+		else if (strcmp("Motors5-Servos2", argv[myoptind]) == 0) {
+			PX4_INFO("Start Motor Test");
+				px4_usleep(2000000);
+				for (int i = 0; i < 4; ++i) {
+					
+						value = 0.15f;
+						switch (i) {
+									case 0:
+										mt = m[0];;
+										break;
+									case 1:
+										mt = m[1];
+										break;
+									case 2:
+										mt = m[2];
+										break;
+									case 3:
+										mt = m[3];
+										break;
+									case 4:
+										mt = m[4];
+										break;
+									default:
+										mt =i;
+								}
+
+						//PX4_INFO("Real M %i value (%.0f%%)",mt, (double)(value*100.f));
+						PX4_INFO("Motor %i Real M %d value (%.0f%%)", i+1, mt, (double)(value*100.f));
+						actuator_test(actuator_test_s::FUNCTION_MOTOR1+mt, value, 1500, false);
+						//actuator_test(int function,float value, int timeout_ms, bool release_control)
+						px4_usleep(2000000);
+						
+
+					PX4_INFO("Waiting 2 sec to Motor %i",i+2);
+					px4_usleep(2000000);
+					//a += 1;
+				}
+				PX4_INFO("FINISH!!!");
+
+			PX4_INFO("Start Servo Test");
+				for (int i = 0; i < 2; ++i) {
+					value = 0.0f;
+					PX4_INFO("Start Servo %i value = (%.0f%%)",i+1,(double)(value*100.f));
+						px4_usleep(2000000);
+						for (int x = 1; x < 5; ++x) {
+								//float result = std::pow(-1, x + 1);
+								float result = 0.0f;
+								switch (x % 2) {
+									case 0:
+										result =-1.0f;
+										break;
+									case 1:
+										result =1.0f;
+										break;
+									default:
+										result =0.0f;
+								}
+								value = result*0.8f;
+								PX4_INFO("Servo %i Test %d value (%.0f%%)", i+1, x, (double)(value*100.f));
+								actuator_test(actuator_test_s::FUNCTION_SERVO1+i, value, 800, false);
+								//actuator_test(int function,float value, int timeout_ms, bool release_control)
+								px4_usleep(2000000);
+						}
+					if(i == 1){
+						break;
+					}
+
+					PX4_INFO("Waiting 2 sec to Servo %i",i+2);
+					px4_usleep(2000000);
+				}
+				PX4_INFO("FINISH!!!");
+			return 0;
+		}
+		//itim4
+
+
+		else if (strcmp("Motors-User", argv[myoptind]) == 0) {
+
+				PX4_INFO("Start Motor Test");
+				px4_usleep(2000000);
+				for (int i = 0; i < actuator_test_s::MAX_NUM_MOTORS; ++i) {
+					
+						value = 0.15f;
+						switch (i) {
+									case 0:
+										mt = m[0];;
+										break;
+									case 1:
+										mt = m[1];
+										break;
+									case 2:
+										mt = m[2];
+										break;
+									case 3:
+										mt = m[3];
+										break;
+									case 4:
+										mt = m[4];
+										break;
+									default:
+										mt =i;
+								}
+
+						//PX4_INFO("Real M %i value (%.0f%%)",mt, (double)(value*100.f));
+						PX4_INFO("Motor %i Real M %d value (%.0f%%)", i+1, mt, (double)(value*100.f));
+						actuator_test(actuator_test_s::FUNCTION_MOTOR1+mt, value, 1500, false);
+						//actuator_test(int function,float value, int timeout_ms, bool release_control)
+						px4_usleep(2000000);
+						
+
+					PX4_INFO("Waiting 5 sec to Motor %i",i+2);
+					px4_usleep(5000000);
+					//a += 1;
+				}
+				PX4_INFO("FINISH!!!");
+			return 0;
+		}
+		//itim4
+
 	}
 
 	usage(nullptr);

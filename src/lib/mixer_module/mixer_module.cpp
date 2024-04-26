@@ -429,9 +429,22 @@ bool MixingOutput::update()
 		_interface.ScheduleDelayed(50_ms);
 	}
 
+	/*
+	// Default actuator test update
 	// check for actuator test
 	_actuator_test.update(_max_num_outputs, _param_thr_mdl_fac.get());
+	*/
+	
+	if (_param_auto_pfl_en.get() == 0){
+		_actuator_test.update(_max_num_outputs, _param_thr_mdl_fac.get());
+	}//_param_auto_pfl_en Disable
 
+	// if (_param_auto_pfl_en.get() == 1){
+	// 	_actuator_value_mix.update(_max_num_outputs, _param_auto_pfl_mode.get());
+	// 	PX4_INFO("auto_pfl_en Enable");
+	// }//_param_auto_pfl_en Enable
+
+	
 	// get output values
 	float outputs[MAX_ACTUATORS];
 	bool all_disabled = true;
@@ -443,6 +456,7 @@ bool MixingOutput::update()
 
 			if (_armed.armed || (_armed.prearmed && _functions[i]->allowPrearmControl())) {
 				outputs[i] = _functions[i]->value(_function_assignment[i]);
+				//PX4_INFO("\toutputs[%i] = %.2f \n \tvalue(_function_assignment[i]); = %.2f \n \t_funcn_ment[i] = [%.2f]",i, (double)outputs[i], (double)_functions[i]->value(_function_assignment[i]),(double)_function_assignment[i]);
 
 			} else {
 				outputs[i] = NAN;
@@ -457,10 +471,24 @@ bool MixingOutput::update()
 
 	if (!all_disabled) {
 		if (!_armed.armed && !_armed.manual_lockdown) {
+						// PX4_WARN("__FUNC:%.2f___outputs[0] = %.2f;",(double)_function_assignment[0],(double)outputs[0]);
+						// PX4_WARN("__FUNC:%.2f___outputs[1] = %.2f;",(double)_function_assignment[1],(double)outputs[1]);
+						// PX4_WARN("__FUNC:%.2f___outputs[2] = %.2f;",(double)_function_assignment[2],(double)outputs[2]);
+
 			_actuator_test.overrideValues(outputs, _max_num_outputs);
+					// PX4_INFO("test");
+					// PX4_WARN("__FUNC:%.2f___outputs[0] = %.2f;",(double)_function_assignment[0],(double)outputs[0]);
+					// PX4_WARN("__FUNC:%.2f___outputs[1] = %.2f;",(double)_function_assignment[1],(double)outputs[1]);
+					// PX4_WARN("__FUNC:%.2f___outputs[2] = %.2f;",(double)_function_assignment[2],(double)outputs[2]);
+			//_actuator_value_mix.overrideValues(outputs, _max_num_outputs,_param_auto_pfl_mode.get());
+					// PX4_INFO("value_mix");
+					// PX4_WARN("__FUNC:%.2f___outputs[0] = %.2f;",(double)_function_assignment[0],(double)outputs[0]);
+					// PX4_WARN("__FUNC:%.2f___outputs[1] = %.2f;",(double)_function_assignment[1],(double)outputs[1]);
+					// PX4_WARN("__FUNC:%.2f___outputs[2] = %.2f;",(double)_function_assignment[2],(double)outputs[2]);
+			
 		}
 
-		limitAndUpdateOutputs(outputs, has_updates);
+		limitAndUpdateOutputs(outputs, has_updates);		
 	}
 
 	return true;
@@ -489,7 +517,7 @@ MixingOutput::limitAndUpdateOutputs(float outputs[MAX_ACTUATORS], bool has_updat
 		// the output limit call takes care of out of band errors, NaN and constrains
 		output_limit_calc(_throttle_armed || _actuator_test.inTestMode(), _max_num_outputs, outputs);
 	}
-
+			//itim2
 	// We must calibrate the PWM and Oneshot ESCs to a consistent range of 1000-2000us (gets mapped to 125-250us for Oneshot)
 	// Doing so makes calibrations consistent among different configurations and hence PWM minimum and maximum have a consistent effect
 	// hence the defaults for these parameters also make most setups work out of the box
@@ -508,7 +536,7 @@ MixingOutput::limitAndUpdateOutputs(float outputs[MAX_ACTUATORS], bool has_updat
 		}
 	}
 
-	/* now return the outputs to the driver */
+	/* now return the outputs to the driver */ //itim3
 	if (_interface.updateOutputs(stop_motors, _current_output_value, _max_num_outputs, has_updates)) {
 		actuator_outputs_s actuator_outputs{};
 		setAndPublishActuatorOutputs(_max_num_outputs, actuator_outputs);

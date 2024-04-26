@@ -43,6 +43,11 @@ ActuatorTest::ActuatorTest(const OutputFunction function_assignments[MAX_ACTUATO
 	reset();
 }
 
+// ActuatorTest::~ActuatorTest()
+// {
+
+// }
+
 void ActuatorTest::update(int num_outputs, float thrust_curve)
 {
 	const hrt_abstime now = hrt_absolute_time();

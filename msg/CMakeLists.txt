@@ -50,6 +50,7 @@ set(msg_files
 	AirspeedValidated.msg
 	AirspeedWind.msg
 	AutotuneAttitudeControlStatus.msg
+	ATmn.msg				#New msg
 	BatteryStatus.msg
 	ButtonEvent.msg
 	CameraCapture.msg
@@ -175,6 +176,13 @@ set(msg_files
 	SensorsStatus.msg
 	SensorsStatusImu.msg
 	SensorUwb.msg
+	ServoInfo.msg
+	ServoPowerReport.msg
+	ServoPowerStatus.msg
+	ServoReport.msg
+	ServoStatus.msg
+	ServoTempReport.msg
+	ServoTempStatus.msg
 	SystemPower.msg
 	TakeoffStatus.msg
 	TaskStackInfo.msg

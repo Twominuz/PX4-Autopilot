@@ -37,6 +37,7 @@ WorkItemExample::WorkItemExample() :
 	ModuleParams(nullptr),
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::test1)
 {
+	parameters_update();
 }
 
 WorkItemExample::~WorkItemExample()
@@ -58,6 +59,15 @@ bool WorkItemExample::init()
 
 	return true;
 }
+void WorkItemExample::parameters_update()
+{
+	if (_parameter_update_sub.updated()) {
+			// clear update
+			parameter_update_s param_update;
+			_parameter_update_sub.copy(&param_update);
+			updateParams(); // update module parameters (in DEFINE_PARAMETERS)
+		}
+}
 
 void WorkItemExample::Run()
 {
@@ -70,13 +80,9 @@ void WorkItemExample::Run()
 	perf_begin(_loop_perf);
 	perf_count(_loop_interval_perf);
 
+	parameters_update();
 	// Check if parameters have changed
-	if (_parameter_update_sub.updated()) {
-		// clear update
-		parameter_update_s param_update;
-		_parameter_update_sub.copy(&param_update);
-		updateParams(); // update module parameters (in DEFINE_PARAMETERS)
-	}
+
 
 
 	// Example
@@ -88,11 +94,51 @@ void WorkItemExample::Run()
 
 			const bool armed = (vehicle_status.arming_state == vehicle_status_s::ARMING_STATE_ARMED);
 
+
 			if (armed && !_armed) {
-				PX4_WARN("vehicle armed due to %d", vehicle_status.latest_arming_reason);
+				char armed_state[60];
+				switch (vehicle_status.latest_arming_reason) {
+					case 1:
+					strcpy(armed_state, "RC_STICK");
+					break;
+
+					case 3:
+					strcpy(armed_state, "COMMAND_INTERNAL");
+					break;
+
+					case 2:
+					strcpy(armed_state, "RC_SWITCH");
+					break;
+
+					case 4:
+					strcpy(armed_state, "COMMAND_EXTERNAL");
+					break;
+
+					default:
+
+					break;
+				}
+				PX4_WARN("vehicle armed due to %s", armed_state);
 
 			} else if (!armed && _armed) {
-				PX4_INFO("vehicle disarmed due to %d", vehicle_status.latest_disarming_reason);
+				char dis_armed_state[60];
+				switch (vehicle_status.latest_disarming_reason) {
+					case 1:
+					strcpy(dis_armed_state, "RC_STICK");
+					break;
+
+					case 2:
+					strcpy(dis_armed_state, "RC_SWITCH");
+					break;
+
+					case 7:
+					strcpy(dis_armed_state, "AUTO_DISARM_LAND");
+					break;
+
+					default:
+					break;
+				}
+				PX4_WARN("vehicle disarmed due to %s", dis_armed_state);
 			}
 
 			_armed = armed;
@@ -110,18 +156,36 @@ void WorkItemExample::Run()
 
 			// access parameter value (SYS_AUTOSTART)
 			if (_param_sys_autostart.get() == 1234) {
+				int test_param = _param_sys_autostart.get();
 				// do something if SYS_AUTOSTART is 1234
+				/*if (_print_state == true){
+					PX4_INFO("SYS_AUTOSTART SET");
+					_print_state = false;
+					*/
+
+					if (_time_reset){
+						_previous_time = hrt_absolute_time();
+						_time_reset =false;
+
+					}
+
+					if(hrt_elapsed_time(&_previous_time) > 1_s){
+						_time_reset=true;
+						PX4_INFO("SYS_AUTOSTART SET to %d",test_param);
+					}
+				}
 			}
 		}
-	}
+
 
 
 	// Example
 	//  publish some data
+	/*
 	orb_test_s data{};
 	data.val = 314159;
 	data.timestamp = hrt_absolute_time();
-	_orb_test_pub.publish(data);
+	_orb_test_pub.publish(data); */
 
 
 	perf_end(_loop_perf);

@@ -39,3 +39,8 @@ if [ "$PX4_SIMULATOR" = "sihsim" ]; then
 	mavlink stream -r 200 -s HIL_ACTUATOR_CONTROLS -u  $udp_sihsim_port_local
 	mavlink stream -r 25 -s HIL_STATE_QUATERNION -u  $udp_sihsim_port_local
 fi
+
+if param compare -s SN_NWI_EN 1
+then
+	new_work_item_example start
+fi

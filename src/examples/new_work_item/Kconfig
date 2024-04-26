@@ -1,0 +1,5 @@
+menuconfig EXAMPLES_NEW_WORK_ITEM
+	bool "new_work_item"
+	default n
+	---help---
+		Enable support for new_work_item

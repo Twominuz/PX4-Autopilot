@@ -74,6 +74,8 @@ public:
 private:
 	void Run() override;
 
+	void parameters_update();
+
 	// Publications
 	uORB::Publication<orb_test_s> _orb_test_pub{ORB_ID(orb_test)};
 
@@ -94,4 +96,10 @@ private:
 
 
 	bool _armed{false};
+	bool _print_state{true};
+
+	bool _time_reset{true};
+	hrt_abstime _previous_time{0};
+	// Camel Case : addNumber()
+	// Snake case : first_number; 
 };

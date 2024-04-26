@@ -105,12 +105,12 @@ void FakeImu::Run()
 		const double y_F = y_f0 + (y_f1 - y_f0) * t / (2 * T);
 		const double z_F = z_f0 + (z_f1 - z_f0) * t / (2 * T);
 
-		gyro.x[n] = roundf(A * sin(2 * M_PI * x_F * t));
+		gyro.x[n] = roundf(A * sin(2 * M_PI * x_F * t)); //sweep sine wave sin(2Pi*f*t)  A is AMPLITUDE
 		gyro.y[n] = roundf(A * sin(2 * M_PI * y_F * t));
 		gyro.z[n] = roundf(A * sin(2 * M_PI * z_F * t));
 
 		if (n == 0) {
-			x_freq = (x_f1 - x_f0) * (t / T) + x_f0;
+			x_freq = (x_f1 - x_f0) * (t / T) + x_f0; // linear Acc
 			y_freq = (y_f1 - y_f0) * (t / T) + y_f0;
 			z_freq = (z_f1 - z_f0) * (t / T) + z_f0;
 

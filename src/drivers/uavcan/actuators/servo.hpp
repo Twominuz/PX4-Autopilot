@@ -39,8 +39,19 @@
 #include <lib/perf/perf_counter.h>
 #include <uORB/PublicationMulti.hpp>
 #include <uORB/topics/actuator_outputs.h>
+
+#include <uORB/topics/servo_status.h>
 #include <drivers/drv_hrt.h>
 #include <lib/mixer_module/mixer_module.hpp>
+#include <uORB/topics/debug_vect.h>
+
+
+#include <uORB/topics/servo_power_status.h>
+#include <uavcan/equipment/power/CircuitStatus.hpp>
+
+
+#include <uORB/topics/servo_temp_status.h>
+#include <uavcan/equipment/device/Temperature.hpp>
 
 class UavcanServoController
 {
@@ -54,7 +65,71 @@ public:
 
 	void update_outputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS], unsigned num_outputs);
 
+	int init();
+
+       /**
+        * Sets the number of servo and enable timer
+        */
+       void set_servo_count(uint8_t count);
+       void set_servo_power_count(uint8_t power_count);
+       void set_servo_temp_count(uint8_t temp_count);
+
+       servo_status_s &servo_status() { return _servo_status; }
+       servo_power_status_s &servo_power_status() { return _servo_power_status; }
+       servo_temp_status_s &servo_temp_status() { return _servo_temp_status; }
+
 private:
-	uavcan::INode								&_node;
-	uavcan::Publisher<uavcan::equipment::actuator::ArrayCommand> _uavcan_pub_array_cmd;
+  	/**
+        * Servo status message reception will be reported via this callback.
+        */
+	void servo_status_sub_cb(const uavcan::ReceivedDataStructure<uavcan::equipment::actuator::Status> &msg);
+	void servo_power_status_sub_cb(const uavcan::ReceivedDataStructure<uavcan::equipment::power::CircuitStatus> &msg);
+	void servo_temp_status_sub_cb(const uavcan::ReceivedDataStructure<uavcan::equipment::device::Temperature> &msg);
+
+	/**
+        * Checks all the Servo's freshness based on timestamp, if an servo exceeds the timeout then is flagged offline.
+        */
+	uint8_t check_servos_status();
+	uint8_t check_servos_power_status();
+	uint8_t check_servos_temp_status();
+
+
+	typedef uavcan::MethodBinder<UavcanServoController *,
+		void (UavcanServoController::*)(const uavcan::ReceivedDataStructure<uavcan::equipment::actuator::Status>&)>
+		StatusCbBinder;
+
+	typedef uavcan::MethodBinder<UavcanServoController *,
+		void (UavcanServoController::*)(const uavcan::ReceivedDataStructure<uavcan::equipment::power::CircuitStatus>&)>
+		PowerStatusCbBinder;
+
+	typedef uavcan::MethodBinder<UavcanServoController *,
+		void (UavcanServoController::*)(const uavcan::ReceivedDataStructure<uavcan::equipment::device::Temperature>&)>
+		TempStatusCbBinder;
+
+	typedef uavcan::MethodBinder<UavcanServoController *,
+		void (UavcanServoController::*)(const uavcan::TimerEvent &)> TimerCbBinder;
+
+		uavcan::INode								&_node;
+		uavcan::Publisher<uavcan::equipment::actuator::ArrayCommand> _uavcan_pub_array_cmd;
+		uavcan::Subscriber<uavcan::equipment::actuator::Status, StatusCbBinder> _uavcan_sub_status;
+		uavcan::Subscriber<uavcan::equipment::power::CircuitStatus, PowerStatusCbBinder> _uavcan_sub_power_status;
+		uavcan::Subscriber<uavcan::equipment::device::Temperature, TempStatusCbBinder> _uavcan_sub_temp_status;
+
+		uORB::PublicationMulti<servo_status_s> _servo_status_pub{ORB_ID(servo_status)};
+		uORB::PublicationMulti<servo_power_status_s> _servo_power_status_pub{ORB_ID(servo_power_status)};
+		uORB::PublicationMulti<servo_temp_status_s> _servo_temp_status_pub{ORB_ID(servo_temp_status)};
+
+		servo_status_s _servo_status{};
+		servo_power_status_s _servo_power_status{};
+		servo_temp_status_s _servo_temp_status{};
+
+		uint32_t _servo_count{0};
+		uint32_t _servo_power_count{0};
+		uint32_t _servo_temp_count{0};
+
+		debug_vect_s    _debug_vect = {};
+		uORB::Publication<debug_vect_s> _debug_status_pub{ORB_ID(debug_vect)};
+
+
+
 };

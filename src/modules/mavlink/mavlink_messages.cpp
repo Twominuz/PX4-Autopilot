@@ -120,6 +120,10 @@
 #include "streams/VFR_HUD.hpp"
 #include "streams/VIBRATION.hpp"
 #include "streams/WIND_COV.hpp"
+//Custom 
+// #include "streams/SERVO_INFO.hpp"
+// #include "streams/SERVO_STATUS.hpp"
+// #include "streams/SERVO_TEMP_STATUS.hpp"
 
 #if !defined(CONSTRAINED_FLASH)
 # include "streams/ADSB_VEHICLE.hpp"
@@ -481,8 +485,17 @@ static const StreamListItem streams_list[] = {
 	create_stream_list_item<MavlinkStreamUavionixADSBOutCfg>(),
 #endif // UAVIONIX_ADSB_OUT_CFG_HPP
 #if defined(UAVIONIX_ADSB_OUT_DYNAMIC_HPP)
-	create_stream_list_item<MavlinkStreamUavionixADSBOutDynamic>()
+	create_stream_list_item<MavlinkStreamUavionixADSBOutDynamic>(),
 #endif // UAVIONIX_ADSB_OUT_DYNAMIC_HPP
+#if defined(SERVO_INFO_HPP)
+	create_stream_list_item<MavlinkStreamSERVOInfo>(),
+#endif // SERVO_INFO_HPP
+#if defined(SERVO_STATUS_HPP)
+	create_stream_list_item<MavlinkStreamServoStatus>(),
+#endif // SERVO_status_HPP
+#if defined(SERVO_TEMP_STATUS_HPP)
+	create_stream_list_item<MavlinkStreamServoTempStatus>(),
+#endif //  SERVO_TEMP_STATUS_HPP
 };
 
 const char *get_stream_name(const uint16_t msg_id)
