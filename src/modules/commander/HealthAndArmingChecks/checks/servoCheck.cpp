@@ -94,7 +94,7 @@ void ServoChecks::checkAndReport(const Context &context, Report &reporter)
 		/* EVENT
 		 * @description
 		 * <profile name="dev">
-		 * This check can be configured via <param>COM_ARM_CHK_SVS++++++++++</param> parameter.
+		 * This check can be configured via <param>COM_ARM_CHK_SVS</param> parameter.
 		 * </profile>
 		 */
 		reporter.healthFailure(NavModes::All, health_component_t::actuator_servos, events::ID("check_servos_telem_missing"),
@@ -131,6 +131,7 @@ void ServoChecks::checkServoStatus(const Context &context, Report &reporter, con
 					online_bitmask = 11111111
 					servo_status.servo_online_flags = 11111101
 		*/
+
 		// Check if one or more the SERVOs are offline
 		if (online_bitmask != servo_status.servo_online_flags) {
 			/*	loop check index
@@ -158,96 +159,98 @@ void ServoChecks::checkServoStatus(const Context &context, Report &reporter, con
 			}
 		}
 
-		// for (int index = 0; index < servo_status.servo_count; index++) {
 
-		// 	if (servo_power_status.servo[index].servo_power_error_flags != 0) {
+		// Check each servo has fault.
+		for (int index = 0; index < servo_status.servo_count; index++) {
 
-		// 		for (uint8_t power_fault_index = 0; power_fault_index <= static_cast<uint8_t>(servo_power_fault_reason_t::_max); power_fault_index++) {
-		// 			if (servo_status.servo[index].failures & (1 << fault_index)) {
+			/*servo power status (OVER_VOLTAGE, UNDER_VOLTAGE, OVER_CURRENT, OVER_CURRENT_PROTECT)*/
+			if (servo_power_status.servo_power[index].servo_power_error_flags != 0) {
 
-		// 				servo_power_fault_reason_t power_fault_reason_index = static_cast<servo_power_fault_reason_t>(power_fault_index);
+				for (uint8_t power_fault_index = 0; power_fault_index <= static_cast<uint8_t>(servo_power_fault_reason_t::_max); power_fault_index++) {
+					if (servo_power_status.servo_power[index].servo_power_error_flags & (1 << power_fault_index)) {
 
-		// 				const char *user_action = "";
-		// 				events::px4::enums::suggested_action_t action = events::px4::enums::suggested_action_t::none;
+						servo_power_fault_reason_t power_fault_reason_index = static_cast<servo_power_fault_reason_t>(power_fault_index);
 
-		// 				if (context.isArmed()) {
-		// 					if (power_fault_reason_index == servo_power_fault_reason_t::motor_warn_temp
-		// 					    || power_fault_reason_index == servo_power_fault_reason_t::servo_warn_temp) {
-		// 						user_action = "Reduce throttle";
-		// 						action = events::px4::enums::suggested_action_t::reduce_throttle;
+						const char *user_action = "";
+						events::px4::enums::suggested_action_t action = events::px4::enums::suggested_action_t::none;
 
-		// 					} else {
-		// 						user_action = "Land now!";
-		// 						action = events::px4::enums::suggested_action_t::land;
-		// 					}
-		// 				}
+						if (context.isArmed()) {
+							if ((power_fault_reason_index == servo_power_fault_reason_t::servo_over_current_protect)) {
+								user_action = "Land now!";
+								action = events::px4::enums::suggested_action_t::land;
 
-		// 				uint8_t motor_index = servo_status.servo[index].actuator_function - actuator_motors_s::ACTUATOR_FUNCTION_MOTOR1 + 1;
+							} else {
+								user_action = "Land now!";
+								action = events::px4::enums::suggested_action_t::land;
+							}
+						}
 
-		// 				/* EVENT
-		// 				 * @description
-		// 				 * {3}
-		// 				 *
-		// 				 * <profile name="dev">
-		// 				 * This check can be configured via <param>COM_ARM_CHK_SVS</param> parameter.
-		// 				 * </profile>
-		// 				 */
-		// 				reporter.healthFailure<uint8_t, events::px4::enums::servo_power_fault_reason_t, events::px4::enums::suggested_action_t>(
-		// 					required_modes, health_component_t::actuator_servos, events::ID("check_servos_fault"),
-		// 					events::Log::Critical, "SERVO {1}: {2}", motor_index, fault_reason_index, action);
+						uint8_t servo_index = servo_status.servo[index].servo_function - actuator_servos_s::ACTUATOR_FUNCTION_SERVO1 + 1;
 
-		// 				if (reporter.mavlink_log_pub()) {
-		// 					mavlink_log_emergency(reporter.mavlink_log_pub(), "SERVO%d: %s. %s \t", motor_index,
-		// 							      servo_power_fault_reason_str(fault_reason_index), user_action);
-		// 				}
-		// 			}
-		// 		}
-		// 	}
+						/* EVENT
+						 * @description
+						 * {3}
+						 *
+						 * <profile name="dev">
+						 * This check can be configured via <param>COM_ARM_CHK_SVS</param> parameter.
+						 * </profile>
+						 */
+						reporter.healthFailure<uint8_t, events::px4::enums::servo_power_fault_reason_t, events::px4::enums::suggested_action_t>(
+							required_modes, health_component_t::actuator_servos, events::ID("check_servos_power_fault"),
+							events::Log::Critical, "SERVO {1}: {2}", servo_index, power_fault_reason_index, action);
 
-		// 	if (servo_status.servo[index].failures != 0) {
+						if (reporter.mavlink_log_pub()) {
+							mavlink_log_emergency(reporter.mavlink_log_pub(), "SERVO%d: %s. %s \t", servo_index,
+									      servo_power_fault_reason_str(power_fault_reason_index), user_action);
+						}
+					}
+				}
+			}
 
-		// 		for (uint8_t fault_index = 0; fault_index <= static_cast<uint8_t>(servo_power_fault_reason_t::_max); fault_index++) {
-		// 			if (servo_status.servo[index].failures & (1 << fault_index)) {
+			/*servo temp status (Over Heat, Over Cooling)*/
+			if (servo_temp_status.servo_temp[index].servo_temp_error_flags != 0) {
 
-		// 				servo_power_fault_reason_t fault_reason_index = static_cast<servo_power_fault_reason_t>(fault_index);
+				for (uint8_t temp_fault_index = 0; temp_fault_index <= static_cast<uint8_t>(servo_temp_fault_reason_t::_max); temp_fault_index++) {
+					if (servo_temp_status.servo_temp[index].servo_temp_error_flags & (1 << temp_fault_index)) {
 
-		// 				const char *user_action = "";
-		// 				events::px4::enums::suggested_action_t action = events::px4::enums::suggested_action_t::none;
+						servo_temp_fault_reason_t temp_fault_reason_index = static_cast<servo_temp_fault_reason_t>(temp_fault_index);
 
-		// 				if (context.isArmed()) {
-		// 					if (fault_reason_index == servo_power_fault_reason_t::motor_warn_temp
-		// 					    || fault_reason_index == servo_power_fault_reason_t::servo_warn_temp) {
-		// 						user_action = "Reduce throttle";
-		// 						action = events::px4::enums::suggested_action_t::reduce_throttle;
+						const char *user_action = "";
+						events::px4::enums::suggested_action_t action = events::px4::enums::suggested_action_t::none;
 
-		// 					} else {
-		// 						user_action = "Land now!";
-		// 						action = events::px4::enums::suggested_action_t::land;
-		// 					}
-		// 				}
+						if (context.isArmed()) {
+							if ((temp_fault_reason_index == servo_temp_fault_reason_t::servo_over_heating)) {
+								user_action = "Land now!";
+								action = events::px4::enums::suggested_action_t::land;
 
-		// 				uint8_t motor_index = servo_status.servo[index].actuator_function - actuator_motors_s::ACTUATOR_FUNCTION_MOTOR1 + 1;
+							} else {
+								user_action = "Land now!";
+								action = events::px4::enums::suggested_action_t::land;
+							}
+						}
 
-		// 				/* EVENT
-		// 				 * @description
-		// 				 * {3}
-		// 				 *
-		// 				 * <profile name="dev">
-		// 				 * This check can be configured via <param>COM_ARM_CHK_SVS</param> parameter.
-		// 				 * </profile>
-		// 				 */
-		// 				reporter.healthFailure<uint8_t, events::px4::enums::servo_power_fault_reason_t, events::px4::enums::suggested_action_t>(
-		// 					required_modes, health_component_t::actuator_servos, events::ID("check_servos_fault"),
-		// 					events::Log::Critical, "SERVO {1}: {2}", motor_index, fault_reason_index, action);
+						uint8_t servo_index = servo_status.servo[index].servo_function - actuator_servos_s::ACTUATOR_FUNCTION_SERVO1 + 1;
 
-		// 				if (reporter.mavlink_log_pub()) {
-		// 					mavlink_log_emergency(reporter.mavlink_log_pub(), "SERVO%d: %s. %s \t", motor_index,
-		// 							      servo_power_fault_reason_str(fault_reason_index), user_action);
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
+						/* EVENT
+						 * @description
+						 * {3}
+						 *
+						 * <profile name="dev">
+						 * This check can be configured via <param>COM_ARM_CHK_SVS</param> parameter.
+						 * </profile>
+						 */
+						reporter.healthFailure<uint8_t, events::px4::enums::servo_temp_fault_reason_t, events::px4::enums::suggested_action_t>(
+							required_modes, health_component_t::actuator_servos, events::ID("check_servos_temp_fault"),
+							events::Log::Critical, "SERVO {1}: {2}", servo_index, temp_fault_reason_index, action);
+
+						if (reporter.mavlink_log_pub()) {
+							mavlink_log_emergency(reporter.mavlink_log_pub(), "SERVO%d: %s. %s \t", servo_index,
+									      servo_temp_fault_reason_str(temp_fault_reason_index), user_action);
+						}
+					}
+				}
+			}
+		}
 	}
 }
 

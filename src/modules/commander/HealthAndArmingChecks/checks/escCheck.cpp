@@ -117,9 +117,9 @@ void EscChecks::checkEscStatus(const Context &context, Report &reporter, const e
 		*/
 		int online_bitmask = (1 << esc_status.esc_count) - 1;
 
-		
-		/* 
-			Ex. 	if esc 2 fail 	
+
+		/*
+			Ex. 	if esc 2 fail
 					online_bitmask = 11111111
 					esc_status.esc_online_flags = 11111101
 		*/
@@ -135,7 +135,7 @@ void EscChecks::checkEscStatus(const Context &context, Report &reporter, const e
 					/* EVENT
 					 * @description
 					 * <profile name="dev">
-					 * This check can be configured via <param>COM_ARM_CHK_ESCS</param> parameter (esc-itim 138).
+					 * This check can be configured via <param>COM_ARM_CHK_ESCS</param> parameter.
 					 * </profile>
 					 */
 					reporter.healthFailure<uint8_t>(required_modes, health_component_t::motors_escs, events::ID("check_escs_offline"),
