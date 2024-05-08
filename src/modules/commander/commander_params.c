@@ -880,6 +880,17 @@ PARAM_DEFINE_INT32(COM_FLT_PROFILE, 0);
 PARAM_DEFINE_INT32(COM_ARM_CHK_ESCS, 0);
 
 /**
+ * Enable checks on Servos that report telemetry.
+ *
+ * If this parameter is set, the system will check Servo's online status and failures.
+ * This param is specific for Servos reporting status. It shall be used only if Servos support telemetry.
+ *
+ * @group Commander
+ * @boolean
+ */
+PARAM_DEFINE_INT32(COM_ARM_CHK_SVS, 0);
+
+/**
  * Condition to enter prearmed mode
  *
  * Condition to enter the prearmed state, an intermediate state between disarmed and armed

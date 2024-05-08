@@ -240,6 +240,10 @@
                         "536870912": {
                             "name": "gyro",
                             "description": "Gyroscope"
+                        },
+                        "1073741824": {
+                            "name": "actuator_servos",
+                            "description": "Actuator/Servos"
                         }
                     }
                 },
@@ -645,6 +649,42 @@
                         "9": {
                             "name": "esc_over_temp",
                             "description": "reached a critical temperature"
+                        }
+                    }
+                },
+                "servo_power_fault_reason_t": {
+                    "type": "uint8_t",
+                    "description": "Bitfield for servo power failure reason",
+                    "entries": {
+                        "1": {
+                            "name": "servo_over_voltage",
+                            "description": "detected over voltage"
+                        },
+                        "2": {
+                            "name": "servo_under_voltage",
+                            "description": "detected under voltage"
+                        },
+                        "4": {
+                            "name": "servo_over_current",
+                            "description": "detected over current"
+                        },
+                        "8": {
+                            "name": "servo_over_current_protect",
+                            "description": "detected over current protection"
+                        }
+                    }
+                },
+                "servo_temp_fault_reason_t": {
+                    "type": "uint8_t",
+                    "description": "Bitfield for servo temp failure reason",
+                    "entries": {
+                        "1": {
+                            "name": "servo_over_heating",
+                            "description": "detected over heating temperature"
+                        },
+                        "2": {
+                            "name": "servo_under_cooling",
+                            "description": "detected over cooling temperature"
                         }
                     }
                 },

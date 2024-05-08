@@ -121,9 +121,9 @@
 #include "streams/VIBRATION.hpp"
 #include "streams/WIND_COV.hpp"
 //Custom 
-// #include "streams/SERVO_INFO.hpp"
-// #include "streams/SERVO_STATUS.hpp"
-// #include "streams/SERVO_TEMP_STATUS.hpp"
+#include "streams/SERVO_INFO.hpp"
+//#include "streams/SERVO_STATUS.hpp"
+//#include "streams/SERVO_TEMP_STATUS.hpp"
 
 #if !defined(CONSTRAINED_FLASH)
 # include "streams/ADSB_VEHICLE.hpp"

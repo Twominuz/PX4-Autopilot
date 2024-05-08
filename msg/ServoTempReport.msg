@@ -12,3 +12,4 @@ uint8 servo_temp_address                # CANNode Address
 
 uint8  SERVO_FAILURE_OVER_HEATING = 1
 uint8  SERVO_FAILURE_OVER_COOLING = 2
+uint8  SERVO_TEMP_FAILURE_COUNT = 3

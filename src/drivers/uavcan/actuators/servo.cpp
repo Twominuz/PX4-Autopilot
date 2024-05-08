@@ -129,7 +129,7 @@ UavcanServoController::servo_status_sub_cb(const uavcan::ReceivedDataStructure<u
 
 
                
-               if(true  && (msg.actuator_id == 3)){
+               if(false  && (msg.actuator_id == 3)){
                         strncpy(_debug_vect.name, "svPoFo_Id", 10);
                        _debug_vect.timestamp = hrt_absolute_time();
                        _debug_vect.x = msg.position;
@@ -184,6 +184,7 @@ UavcanServoController::servo_power_status_sub_cb(const uavcan::ReceivedDataStruc
 
 
                if(false  && (msg.circuit_id == 3)){
+                        strncpy(_debug_vect.name, "VoCurCirID", 10);
                        _debug_vect.timestamp = hrt_absolute_time();
                        _debug_vect.x = msg.voltage;
                        _debug_vect.y = msg.current;
@@ -236,7 +237,7 @@ UavcanServoController::servo_temp_status_sub_cb(const uavcan::ReceivedDataStruct
                _servo_temp_status_pub.publish(_servo_temp_status);
 
 
-               if(false  && (msg.device_id == 3)){
+               if(true  && (msg.device_id == 3)){
                        _debug_vect.timestamp = hrt_absolute_time();
                        _debug_vect.x = msg.temperature;
                        _debug_vect.y = msg.error_flags;

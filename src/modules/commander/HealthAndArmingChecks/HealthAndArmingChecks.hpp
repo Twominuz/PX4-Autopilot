@@ -68,6 +68,8 @@
 #include "checks/vtolCheck.hpp"
 #include "checks/offboardCheck.hpp"
 
+#include "checks/servoCheck.hpp"
+
 class HealthAndArmingChecks : public ModuleParams
 {
 public:
@@ -140,6 +142,8 @@ private:
 	VtolChecks _vtol_checks;
 	OffboardChecks _offboard_checks;
 
+	ServoChecks _servo_checks;
+
 	HealthAndArmingCheckBase *_checks[30] = {
 		&_accelerometer_checks,
 		&_airspeed_checks,
@@ -168,6 +172,8 @@ private:
 		&_flight_time_checks,
 		&_rc_and_data_link_checks,
 		&_vtol_checks,
+
+		&_servo_checks,	//additional
 	};
 };
 
